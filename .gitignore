@@ -1,0 +1,7 @@
+.*swp
+*pyc
+config.py
+*csv
+*txt
+*db
+data/*
