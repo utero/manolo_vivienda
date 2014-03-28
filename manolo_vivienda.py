@@ -84,7 +84,7 @@ def get_number_of_page_results(html):
 
 
 def buscar(fecha):
-    #sleep(randint(5,15))
+    sleep(randint(1,5))
 
     url = "http://geo.vivienda.gob.pe/Visitas/controlVisitas/index.php"
     url += "?r=consultas/visitaConsulta/index"
@@ -112,7 +112,7 @@ def buscar(fecha):
             url += str(i)
             print url
             try:
-                #sleep(randint(5,15))
+                sleep(randint(1,5))
                 if crawlera:
                     r = requests.post(url, data=payload, headers=headers, proxies=proxies)
                 else:
@@ -159,14 +159,14 @@ except OSError:
 if last_date_in_db():
     d1 = last_date_in_db() - td(days=3)
 else:
-    d1 = date(2012,7,28)
+    d1 = date(2011,7,28)
 
 d2 = d1 + td(days=8)
 delta = d2 - d1
 
-d1 = date(2014,3,26)
-d2 = date(2014,3,27)
-delta = d2 - d1
+#d1 = date(2014,3,26)
+#d2 = date(2014,3,27)
+#delta = d2 - d1
 for i in range(delta.days + 1):
     my_date = d1 + td(days=i)
     fecha = my_date.strftime("%d/%m/%Y")

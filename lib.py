@@ -123,8 +123,8 @@ def create_database():
             table.create_column('host', sqlalchemy.Text)
             table.create_column('office', sqlalchemy.Text)
             table.create_column('meeting_place', sqlalchemy.Text)
-            table.create_column('time_start', sqlalchemy.Time)
-            table.create_column('time_end', sqlalchemy.Time)
+            table.create_column('time_start', sqlalchemy.String)
+            table.create_column('time_end', sqlalchemy.String)
         except:
             pass
 
