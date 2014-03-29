@@ -66,9 +66,9 @@ def html_to_csv(html):
     filename = os.path.join(config.base_folder, "output.csv")
     for i in rows:
         if len(i) > 1:
-            out  = i[0] + "," + i[1] + "," + i[2] + "," + i[3] + ","
-            out += i[4] + "," + i[5] + "," + i[6] + "," + i[7] + ","
-            out += i[8] + "," + i[9] + "\n"
+            out  = i[0] + "|" + i[1] + "|" + i[2] + "|" + i[3] + "|"
+            out += i[4] + "|" + i[5] + "|" + i[6] + "|" + i[7] + "|"
+            out += i[8] + "|" + i[9] + "\n"
             with codecs.open(filename, "a", "utf8") as myfile:
                 print i
                 myfile.write(out)
