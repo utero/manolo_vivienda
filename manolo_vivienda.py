@@ -21,6 +21,8 @@ if config.CRAWLERA_USER != "":
             "http": "http://" + CRAWLERA_USER + ":" + CRAWLERA_PASS + "@proxy.crawlera.com:8010/",
     }
     crawlera = True
+else:
+    crawlera = False
 
 USER_AGENTS = [
 	"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; Crazy Browser 1.0.5)",
@@ -40,6 +42,17 @@ USER_AGENTS = [
 	]
 
 
+def insert_items_to_db():
+    import config, os, dataset
+    filename = os.path.join(config.base_folder, "visitas.db")
+    db = dataset.connect("sqlite:///" + filename)
+    table = db['visitas']
+
+    for i in items:
+        if not table.find_one(sha1=i['sha1']):
+            print i['sha1'], i['date']
+            table.insert(i)
+
 def html_to_csv(html):
     # taken from http://stackoverflow.com/a/14167916
     soup = BeautifulSoup(html)
@@ -51,16 +64,16 @@ def html_to_csv(html):
         rows.append([val.text for val in row.find_all('td')])
 
     filename = os.path.join(config.base_folder, "output.csv")
-    f = codecs.open(filename, "a", "utf8")
     for i in rows:
         if len(i) > 1:
             out  = i[0] + "," + i[1] + "," + i[2] + "," + i[3] + ","
             out += i[4] + "," + i[5] + "," + i[6] + "," + i[7] + ","
             out += i[8] + "," + i[9] + "\n"
-            f.write(out)
+            with codecs.open(filename, "a", "utf8") as myfile:
+                print i
+                myfile.write(out)
         else:
-            print i
-    f.close()
+            print ""
 
     #with codecs.open("output.csv", "a", "utf8") as f:
         #writer = csv.writer(f)
@@ -84,7 +97,7 @@ def get_number_of_page_results(html):
 
 
 def buscar(fecha):
-    sleep(randint(1,5))
+    #sleep(randint(1,5))
 
     url = "http://geo.vivienda.gob.pe/Visitas/controlVisitas/index.php"
     url += "?r=consultas/visitaConsulta/index"
@@ -99,7 +112,7 @@ def buscar(fecha):
     else:
         r = requests.post(url, data=payload, headers=headers)
     r.encoding = "utf8"
-    csv = html_to_csv(r.text)
+    html_to_csv(r.text)
     print url
 
     number_of_pages = get_number_of_page_results(r.text)
@@ -111,16 +124,13 @@ def buscar(fecha):
             url += "&lstVisitasResult_page="
             url += str(i)
             print url
-            try:
-                sleep(randint(1,5))
-                if crawlera:
-                    r = requests.post(url, data=payload, headers=headers, proxies=proxies)
-                else:
-                    r = requests.post(url, data=payload, headers=headers)
-                r.encoding = "utf8"
-                csv = html_to_csv(r.text)
-            except:
-                pass
+            #sleep(randint(1,5))
+            if crawlera:
+                r = requests.post(url, data=payload, headers=headers, proxies=proxies)
+            else:
+                r = requests.post(url, data=payload, headers=headers)
+            r.encoding = "utf8"
+            html_to_csv(r.text)
 
 def last_date_in_db():
     import lib
@@ -149,6 +159,7 @@ try:
 except OSError:
     pass
 
+
 # Use this format for dates
 # fecha = "DD/MM/YYYY"
 
@@ -164,9 +175,9 @@ else:
 d2 = d1 + td(days=8)
 delta = d2 - d1
 
-#d1 = date(2014,3,26)
-#d2 = date(2014,3,27)
-#delta = d2 - d1
+d1 = date(2014,3,24)
+d2 = date(2014,3,24)
+delta = d2 - d1
 for i in range(delta.days + 1):
     my_date = d1 + td(days=i)
     fecha = my_date.strftime("%d/%m/%Y")
@@ -177,13 +188,5 @@ for i in range(delta.days + 1):
 
 # upload data from our csv file
 items = lib.get_data()
-filename = os.path.join(config.base_folder, "visitas.db")
-db = dataset.connect("sqlite:///" + filename)
-table = db['visitas']
-
-for i in items:
-    if not table.find_one(sha1=i['sha1']):
-        print i['sha1'], i['date']
-        table.insert(i)
-
+insert_items_to_db()
 lib.recreate_website()

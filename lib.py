@@ -54,10 +54,13 @@ def get_data():
             item['time_start'] = i[8]
             item['time_end'] = i[9]
     
-            string = str(item['date']) + str(item['id_document']) + str(item['time_start'])
+            string  = str(item['date']).encode('ascii', 'replace')
+            string += item['id_document'].encode('ascii', 'replace')
+            string += str(item['time_start']).encode('ascii', 'replace')
             m = hashlib.sha1()
             m.update(string)
             item['sha1'] = m.hexdigest()
+            print string
     
             items.append(item)
     return items
