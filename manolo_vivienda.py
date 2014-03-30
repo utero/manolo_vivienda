@@ -42,44 +42,6 @@ USER_AGENTS = [
 	]
 
 
-def insert_items_to_db():
-    import config, os, dataset
-    filename = os.path.join(config.base_folder, "visitas.db")
-    db = dataset.connect("sqlite:///" + filename)
-    table = db['visitas']
-
-    for i in items:
-        if not table.find_one(sha1=i['sha1']):
-            print i['sha1'], i['date']
-            table.insert(i)
-
-def html_to_csv(html):
-    # taken from http://stackoverflow.com/a/14167916
-    soup = BeautifulSoup(html)
-    table = soup.find('table', attrs={'class': 'items'})
-    headers = [header.text for header in table.find_all('th')]
-
-    rows = []
-    for row in table.find_all('tr'):
-        rows.append([val.text for val in row.find_all('td')])
-
-    filename = os.path.join(config.base_folder, "output.csv")
-    for i in rows:
-        if len(i) > 1:
-            out  = i[0] + "|" + i[1] + "|" + i[2] + "|" + i[3] + "|"
-            out += i[4] + "|" + i[5] + "|" + i[6] + "|" + i[7] + "|"
-            out += i[8] + "|" + i[9] + "\n"
-            with codecs.open(filename, "a", "utf8") as myfile:
-                print i
-                myfile.write(out)
-        else:
-            print ""
-
-    #with codecs.open("output.csv", "a", "utf8") as f:
-        #writer = csv.writer(f)
-        #writer.writerow(headers)
-        #writer.writerows(row for row in rows if row)
-
 def get_number_of_page_results(html):
     soup = BeautifulSoup(html)
     res = soup.find_all(href=re.compile("lstVisitasResult_page=([0-9]+)"))
@@ -97,7 +59,7 @@ def get_number_of_page_results(html):
 
 
 def buscar(fecha):
-    #sleep(randint(1,5))
+    #sleep(randint(5,15))
 
     url = "http://geo.vivienda.gob.pe/Visitas/controlVisitas/index.php"
     url += "?r=consultas/visitaConsulta/index"
@@ -107,12 +69,12 @@ def buscar(fecha):
             }
     headers = { "User-Agent": USER_AGENTS[randint(0, len(USER_AGENTS))-1]}
 
-    if config.CRAWLERA_USER != "":
+    if crawlera:
         r = requests.post(url, data=payload, headers=headers, proxies=proxies)
     else:
         r = requests.post(url, data=payload, headers=headers)
     r.encoding = "utf8"
-    html_to_csv(r.text)
+    myjson = lib.html_to_json(r.text)
     print url
 
     number_of_pages = get_number_of_page_results(r.text)
@@ -124,16 +86,18 @@ def buscar(fecha):
             url += "&lstVisitasResult_page="
             url += str(i)
             print url
-            #sleep(randint(1,5))
-            if crawlera:
-                r = requests.post(url, data=payload, headers=headers, proxies=proxies)
-            else:
-                r = requests.post(url, data=payload, headers=headers)
-            r.encoding = "utf8"
-            html_to_csv(r.text)
+            try:
+                #sleep(randint(5,15))
+                if crawlera:
+                    r = requests.post(url, data=payload, headers=headers, proxies=proxies)
+                else:
+                    r = requests.post(url, data=payload, headers=headers)
+                r.encoding = "utf8"
+                myjson = lib.html_to_json(r.text)
+            except:
+                pass
 
 def last_date_in_db():
-    import lib
     lib.create_database()
     filename = os.path.join(config.base_folder, "visitas.db")
     db = dataset.connect("sqlite:///" + filename)
@@ -154,7 +118,7 @@ def last_date_in_db():
 
 # clean our outfile
 try:
-    filename = os.path.join(config.base_folder, "output.csv")
+    filename = os.path.join(config.base_folder, "output.json")
     os.remove(filename)
 except OSError:
     pass
@@ -173,10 +137,8 @@ else:
     d1 = date(2011,7,28)
 
 d2 = d1 + td(days=8)
-delta = d2 - d1
-
-d1 = date(2014,3,24)
-d2 = date(2014,3,24)
+d1 = date(2014,3,28)
+d2 = date(2014,3,28)
 delta = d2 - d1
 for i in range(delta.days + 1):
     my_date = d1 + td(days=i)
@@ -186,7 +148,18 @@ for i in range(delta.days + 1):
     buscar(fecha)
 
 
-# upload data from our csv file
+filename = os.path.join(config.base_folder, "visitas.db")
+db = dataset.connect("sqlite:///" + filename)
+table = db['visitas']
+
+print "Getting data from our json file"
 items = lib.get_data()
-insert_items_to_db()
+
+print "Uploading data from our json file"
+for i in items:
+    if not table.find_one(sha1=i['sha1']):
+        print i['sha1'], i['date']
+        table.insert(i)
+
+print "Recreating website"
 lib.recreate_website()
