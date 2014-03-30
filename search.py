@@ -19,7 +19,7 @@ data = cgi.FieldStorage()
 
 def sanitize(s):
     s = s.replace("'", "")
-    s = s.replace("-", "")
+    #s = s.replace("-", "")
     s = s.replace('"', "")
     s = s.replace("\\", "")
     s = s.replace(";", "")
