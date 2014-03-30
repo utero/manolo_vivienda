@@ -43,12 +43,13 @@ def sanitize_page(s):
         s = ""
     return s
 
-message = u"""<h2>Este es Manolo</h2>
-            <b>Manolo es un buscador de las personas</b> que visitan las instalaciones del
-            Organismo Supervisor de las Contrataciones del Estado.
+message = u"""<h2>Manolo Vivienda (clon)</h2>
+            <b>Manolo Vivienda es un buscador de las personas</b> que visitan las instalaciones del
+            Ministerio de Vivienda, Construcción y Saneamiento.
             <br />
-            Todos los datos son descargados diariamente de aquí: <b><a href="http://visitas.osce.gob.pe/controlVisitas/index.php?r=consultas/visitaConsulta/index">
-            http://visitas.osce.gob.pe/controlVisitas/index.php?r=consultas/visitaConsulta/index</a></b>
+            Todos los datos son descargados diariamente de aquí: 
+            <b><a href="http://geo.vivienda.gob.pe/Visitas/controlVisitas/index.php?r=consultas/visitaConsulta/index">
+            http://geo.vivienda.gob.pe/Visitas/controlVisitas/index.php?r=consultas/visitaConsulta/index</a></b>
             </p>
             <div class='well'>
             Puedes buscar por nombre o palabra clave. Por ejemplo tipea
@@ -92,6 +93,7 @@ if 'q' in data:
             page = 1
 
         out = ""
+        out += u"<b>Manolo Vivienda</b> <img src='house.png' /><br />"
         out += u"También puedes hacer búsquedas haciendo click sobre cada uno de los resultados."
 
         # show simple paginator if needed

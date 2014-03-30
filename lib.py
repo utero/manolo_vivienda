@@ -28,6 +28,7 @@ def recreate_website():
     shutil.copy2(os.path.join(orig,"base.html"), os.path.join(dest,"base.html"))
     shutil.copy2(os.path.join(orig,"jquery-1.10.2.min.js"), os.path.join(dest,"jquery-1.10.2.min.js"))
     shutil.copy2(os.path.join(orig,"bootstrap.min.js"), os.path.join(dest,"bootstrap.min.js"))
+    shutil.copy2(os.path.join(orig,"house.png"), os.path.join(dest,"house.png"))
 
 
 def html_to_json(html):
